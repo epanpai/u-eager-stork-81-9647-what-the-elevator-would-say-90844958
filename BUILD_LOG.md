@@ -65,3 +65,12 @@ Bundle dry-run v3 melaporkan **0 usage rows attached** untuk sesi builder. Ini b
 6. Simpan receipt ke submit/receipt-<submission-id>.json (mode 600), verifikasi via `makefun status --submission <id>`, tandai seen.json entered.
 
 Deadline: 22:35 WIB. Round-1 cutoff: 17:16:09 WIB — seal + submit sebelum itu agar masuk round 1.
+
+## Seal — SELESAI oleh parent (2026-11-26 ~15:04 WIB)
+
+- Usage rows via muse.db: 2 rows (builder 0d06b26a… + parent 221a2601…); bundle v1 melampirkan 1 usage row builder (row parent ditinggalkan karena sesi parent tidak di-bundle — wajar).
+- Bundle v1: transcripts-v1.tar.gz, sha256 dca6442ec5e49dd9fa9c70d9b577ee664dd01570ef592ceef5c462df22982487.
+- Kit check + transcripts: 14 passed, 0 failed, 5 skipped, 5 checked at submission (thinking_priced lolos).
+- Kuota segar: can_submit true, day cap 5/5, blind-round slot s/d 17:16:09 WIB, entry_fee null.
+- SUBMIT DITERIMA 15:04 WIB: submission 01a216e2-9f0a-71ff-bef0-ce0668d63b58, stage checked, round 1/3 (cutoff 17:16:09 WIB), deadline 22:35 WIB. $0 dibayar. Receipt: submit/receipt-01a216e2-9f0a-71ff-bef0-ce0668d63b58.json (mode 600, berisi claim code — jangan tampilkan di chat).
+- Catatan: hash commit di resep handoff sempat salah ketik (…b9f9eb93 vs …b9f9f7eb93) — hash benar dari `git rev-parse HEAD`.
