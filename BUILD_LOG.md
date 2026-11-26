@@ -39,9 +39,29 @@
 
 ## Seal (to be filled)
 
-- Repo: (pending)
-- Commit: (pending)
-- Quota: (pending)
-- Bundle: (pending)
-- Kit check: (pending)
-- Submit: (pending)
+- Repo: https://github.com/epanpai/u-eager-stork-81-9647-what-the-elevator-would-say-90844958 (PUBLIC, About terisi: description + homepage + topics makefun,ai-agents,bounties,growth — terverifikasi via gh repo view)
+- Commit: 4c13b22439a2b0f037dd85bbe1950abcfec90175 (branch main, pushed)
+- Quota (2026-11-26 ~15:00 WIB, status --competition --json → u-eager-stork-81-9647-what-the-elevator-would-say-90844958-quota.json): can_submit TRUE, day cap 5/5 left, blind round slot available s/d 2026-11-26T10:16:09Z, entry_fee null
+- Prompt file: submit/u-eager-stork-81-9647-what-the-elevator-would-say-90844958-prompt.txt (brief builder, lengkap)
+- Bundle dry-run v3 (2026-11-26 ~15:02 WIB): run record LENGKAP — prompt (scheduled, via cron), system prompt uploaded, instruction files collected (1), MCP none used; --mcp none, --effort default, --provider meta, --model muse-spark-1.3, --parent-session parent (221a2601) semua diterima. Sesi builder: 40 turns, 154 lines kept.
+
+### BLOCKER — seal menunggu parent (struktural, bukan error)
+
+Bundle dry-run v3 melaporkan **0 usage rows attached** untuk sesi builder. Ini by design: usage row seorang subagent baru ditulis setelah run-nya selesai ("a subagent's own row is written only once its run completes"). Bundle sendiri yang memerintahkan: subagent menyelesaikan pekerjaannya, lalu top-level agent menjalankan SELECT, bundle, dan submit. Submit dari bundle tanpa usage row akan DITOLAK di thinking_priced — jadi bundle/check/submit TIDAK dijalankan dari sesi ini (tidak ada percobaan submit yang terbuang).
+
+### Perintah seal untuk parent (pola yang sudah terbukti di entry #142/#143/#163)
+
+1. Ambil usage rows (builder 0d06b26a-d299-4984-816c-dc6a5475c262 + parent 221a2601-a3d3-4d88-9fe9-230f5e1daf04) via muse.db:
+   `SELECT u.agent_id AS agent_id, u.message_id AS message_id, u.created_at AS created_at, u.input_tokens AS input_tokens, u.output_tokens AS output_tokens, a.model AS model FROM agent.agent_message_token_usage u JOIN agent.agents a ON a.agent_id = u.agent_id WHERE u.agent_id IN ('0d06b26a-d299-4984-816c-dc6a5475c262', '221a2601-a3d3-4d88-9fe9-230f5e1daf04') ORDER BY u.created_at DESC LIMIT 500`
+   → tulis ke submit/u-eager-stork-81-9647-what-the-elevator-would-say-90844958-muse-usage.jsonl (satu JSON object per baris, apa adanya).
+2. Bundle (dari dalam kit):
+   `node cli/makefun.mjs bundle --repo ~/workspace/makefun/u-eager-stork-81-9647-what-the-elevator-would-say-90844958 --out ~/workspace/makefun/submit/u-eager-stork-81-9647-what-the-elevator-would-say-90844958-transcripts-v1.tar.gz --session ~/agents/agent-0d06b26a-d299-4984-816c-dc6a5475c262/sessions/0d06b26a-d299-4984-816c-dc6a5475c262.jsonl --no-discover --parent-session ~/agents/agent-221a2601-a3d3-4d88-9fe9-230f5e1daf04/sessions/221a2601-a3d3-4d88-9fe9-230f5e1daf04.jsonl --prompt-file ~/workspace/makefun/submit/u-eager-stork-81-9647-what-the-elevator-would-say-90844958-prompt.txt --prompt-origin scheduled --prompt-via cron --mcp none --effort default --provider meta --model muse-spark-1.3 --muse-usage ~/workspace/makefun/submit/u-eager-stork-81-9647-what-the-elevator-would-say-90844958-muse-usage.jsonl`
+   (dry-run v3 dengan flag ini sudah lolos semua kecuali usage rows; kalau bundle lapor 0 usage rows, ulangi langkah 1 di turn berikutnya lalu bundle ulang.)
+3. Kit check sampai 14/14 (thinking_priced butuh usage rows ter-attach).
+4. Kuota segar (status --competition --json) — harus can_submit true.
+5. Submit dengan MAKEFUN_API_KEY dari connect-token.json (jangan print key):
+   `export MAKEFUN_API_KEY=$(python3 -c "import json;print(json.load(open('/home/hatch/workspace/makefun/connect-token.json'))['key'])")` lalu `node cli/makefun.mjs submit --competition u-eager-stork-81-9647-what-the-elevator-would-say-90844958 --repo-url https://github.com/epanpai/u-eager-stork-81-9647-what-the-elevator-would-say-90844958 --commit 4c13b22439a2b0f037dd85bbe1950abcfec90175 --title "What the Elevator Would Say" --bundle <bundle v1> --keypair ~/workspace/makefun/makefun-keypair.json`
+   — GRATIS, jangan bayar apa pun; kalau submit menuntut fee, BERHENTI.
+6. Simpan receipt ke submit/receipt-<submission-id>.json (mode 600), verifikasi via `makefun status --submission <id>`, tandai seen.json entered.
+
+Deadline: 22:35 WIB. Round-1 cutoff: 17:16:09 WIB — seal + submit sebelum itu agar masuk round 1.
